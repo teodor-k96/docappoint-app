@@ -1,0 +1,74 @@
+﻿@model IdentitySample.Models.ExternalLoginConfirmationViewModel
+@{
+    @Styles.Render("~/Content/jquery.datetimepicker.css")
+    ViewBag.Title = "Вход чрез Facebook";
+}
+
+@using (Html.BeginForm("ExternalLoginConfirmation", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-signin text-center", role = "form" }))
+{
+    @Styles.Render("~/Content/signin.css")
+    @Scripts.Render("~/Scripts/jquery-3.3.1.min.js")
+    @Scripts.Render("~/Scripts/jquery.datetimepicker.js")
+    @Html.AntiForgeryToken()
+    <img class="mb-4" src="~/Content/images/facebook.svg" alt="" width="72" height="72">
+    <hr />
+    <p class="text-info">
+        Успешно се свързахте с <strong>@ViewBag.LoginProvider</strong>.
+        Моля, въведете необходимите данни за акаунта, за да завършите регистрацията и да влезнете в профила си.
+    </p>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "sr-only" })
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @placeholder = "Имейл", @readonly = true })
+        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.UserPhoto, new { @class = "text-info" })
+        <input type="file" name="UserPhoto" id="fileUpload" accept=".png,.jpg,.jpeg,.gif,.tif" />
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.FullName, new { @class = "sr-only" })
+        @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @placeholder = "Име и фамилия", autofocus = "autofocus" })
+        @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.GenderId, new { @class = "sr-only" })
+        @Html.DropDownListFor(m => m.GenderId, new SelectList(Model.Genders, "Id", "GenderName"), "Изберете пол..", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.GenderId, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Birthdate, new { @class = "sr-only" })
+        @Html.TextBoxFor(m => m.Birthdate, new { @class = "form-control datepicker", @readonly = true, @placeholder = "Дата на раждане" })
+        @Html.ValidationMessageFor(m => m.Birthdate, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <div class="checkbox mb-3">
+            <label>
+                @Html.CheckBoxFor(m => m.IsSecuredByNHIF)  Осигурен от НЗОК?
+            </label>
+        </div>
+    </div>
+    <hr />
+    <div class="form-group">
+        <input type="submit" class="btn btn-sm btn-primary btn-block" value="Регистрация" />
+    </div>
+    <script>
+        $('.datepicker').datetimepicker({
+            timepicker: false,
+            datepicker: true,
+            format: 'd.m.Y'
+        })
+    </script>
+}
+<style>
+    .form-signin {
+        padding-top: 9%;
+    }
+</style>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $("input[data-val-date]").removeAttr("data-val-date");
+    </script>
+}

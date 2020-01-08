@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "Лекари";
+}
+
+<style>
+    .icon-cog-green {
+        color: #00ff21;
+    }
+
+    .icon-cog-red {
+        color: #ff0000;
+    }
+
+    h2 {
+        font-size: 30px;
+        text-transform: uppercase;
+        font-weight: 300;
+        text-align: center;
+        margin-bottom: 15px;
+        background-color: rgba(240, 248, 255, 0.50);
+    }
+
+    #doctors {
+        background-color: #e5e0c7;
+        background-image: linear-gradient(to bottom right, rgba(199, 251, 244, 0.70), #91ddfa);
+    }
+
+    .tbl-header {
+        background-color: rgb(219, 119, 47);
+        color: aliceblue;
+    }
+</style>
+<img class="mb-4 img-responsive center-block" style="padding-top: 2%;" src="~/Content/images/doctorsList.svg" alt="" width="100" height="100">
+<h2 class="text-center">Намерете най-близкия лекар..</h2>
+@if (ViewBag.successfulAppoint != null)
+{
+    <div class="alert alert-success" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>@ViewBag.successfulAppoint</strong>
+    </div>
+}
+<table id="doctors" class="table table-bordered table-hover">
+    <thead class="tbl-header">
+        <tr>
+            <th class="text-center">Име</th>
+            <th class="text-center">Специалност</th>
+            <th class="text-center">Град</th>
+            <th class="text-center">Адрес</th>
+            <th class="text-center">Работи ли с НЗОК</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            var table = $("#doctors").DataTable({
+                ajax: {
+                    url: "/api/doctors",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "fullName",
+                        render: function (data, type, doctor) {   //kakvo da izpulnqva poleto
+                            return "<a href='/doctors/editDoctor/" + doctor.id + "'>" + "<i>" + doctor.fullName + "</i>" + "</a>";
+                        },
+                        width: "20%",
+                    },
+                    {
+                        data: "specialty.specialtyName",
+                        width: "20%"
+                    },
+                    {
+                        data: "city.cityName",
+                        width: "20%"
+                    },
+                    {
+                        data: "addressLine",
+                        width: "25%",
+                        searchable: false,
+                    },
+                    {
+                        data: "worksWithNHIF",
+                        render: function (data, type, doctor) {
+                            if (doctor.worksWithNHIF == true)
+                                return "<i class='fa fa-check-circle icon-cog-green'></i>";
+                            else
+                                return "<i class='fa fa-check-circle icon-cog-red'></i>";
+                        },
+                        searchable: false,
+                        width: "15%",
+                        className: "text-center"
+                    }
+                ],
+                "language": {
+                    "search": "Търси по име на доктор:",
+                    "emptyTable": "Няма активни лекари към момента",
+                    "info": "Показване на _START_ до _END_ от _TOTAL_ лекари",
+                    "infoEmpty": "Показване на 0 от общо 0 лекари",
+                    "infoFiltered": "(филтрирани от _MAX_ лекари общо)",
+                    "lengthMenu": "Покажи _MENU_ лекари",
+                    "loadingRecords": "Зареждане...",
+                    "processing": "Обработване...",
+                    "zeroRecords": "Не са открити съвпадения",
+                    "paginate": {
+                        "first": "Първа",
+                        "last": "Последна",
+                        "next": "Следваща",
+                        "previous": "Предишна"
+                    }
+                },
+                initComplete: function () {
+                    this.api().columns([1, 2]).every(function () {
+                        var column = this;
+                        var select = $('<select class=""><option value="">Покажи всички</option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+
+            window.setTimeout(function () {
+                $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                    $(this).remove();
+                });
+            }, 4000);
+        });
+    </script>
+}
+
+
+

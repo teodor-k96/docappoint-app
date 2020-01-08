@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Успешно потвърждаване";
+}
+
+<div class="alert alert-success" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <strong>Успешно потвърждение!</strong>
+</div>
+
+<div class="modal-dialog modal-confirm">
+    <div class="modal-content">
+        <div class="modal-header">
+                <div class="icon-box"><i class="fa fa-check material-icons"></i></div>
+            @*<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>*@
+        </div>
+        <div class="modal-body text-center">
+            <h4>Поздравления!</h4>
+            <p>Вашият имейл беше потвърден успешно! Вече можете да влезнете в акаунта си..</p>
+            <a class="btn btn-primary" data-dismiss="modal" role="button" href="@Url.Action("Login", "Account")">Към вход <i class="fa fa-arrow-right material-icons"></i></a>
+        </div>
+    </div>
+</div>
+
+@*@Html.ActionLink("натиснете тук, за да влезнете в профила си.", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })*@
+
+@section Scripts {
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <script>
+        window.setTimeout(function () {
+            $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                $(this).remove();
+            });
+        }, 4000);
+    </script>
+}

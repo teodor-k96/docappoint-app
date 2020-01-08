@@ -1,0 +1,90 @@
+﻿@model IdentitySample.Models.RegisterViewModel
+@{
+    @Styles.Render("~/Content/jquery.datetimepicker.css")
+    ViewBag.Title = "Регистрация";
+}
+<body>
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-signin text-center", role = "form", enctype = "multipart/form-data" }))
+    {
+        @Scripts.Render("~/Scripts/jquery-3.3.1.min.js")
+        @Scripts.Render("~/Scripts/jquery.datetimepicker.js")
+        @Styles.Render("~/Content/signin.css")
+        @Html.AntiForgeryToken()
+        <img class="mb-4" src="~/Content/images/employee.svg" alt="" width="72" height="72">
+        <hr />
+        <h3 class="h3 mb-3 font-weight-normal">Създайте своя акаунт</h3>
+        if (@ViewBag.errorMessage != null)
+
+        {
+            <p class="text-danger">
+                @ViewBag.errorMessage
+            </p>
+        }
+        <div class="form-group">
+            @Html.LabelFor(m => m.Email, new { @class = "sr-only" })
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @placeholder = "Имейл", autofocus = "autofocus" })
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Password, new { @class = "sr-only" })
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control", @placeholder = "Парола" })
+            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "sr-only" })
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", @placeholder = "Потвърдете паролата" })
+            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.UserPhoto, new { @class = "text-info" })
+            <input type="file" name="UserPhoto" id="fileUpload" accept=".png,.jpg,.jpeg,.gif,.tif" />
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.FullName, new { @class = "sr-only" })
+            @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @placeholder = "Име и фамилия" })
+            @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.GenderId, new { @class = "sr-only" })
+            @Html.DropDownListFor(m => m.GenderId, new SelectList(Model.Genders, "Id", "GenderName"), "Изберете пол..", new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.GenderId, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Birthdate, new { @class = "sr-only" })
+            @Html.TextBoxFor(m => m.Birthdate, new { @class = "form-control datepicker", @readonly = true, @placeholder = "Дата на раждане" })
+            @Html.ValidationMessageFor(m => m.Birthdate, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <div class="checkbox mb-3">
+                <label>
+                    @Html.CheckBoxFor(m => m.IsSecuredByNHIF)  Осигурен от НЗОК?
+                </label>
+            </div>
+        </div>
+        <hr />
+        <div class="form-group">
+            <input type="submit" class="btn btn-sm btn-primary btn-block" value="Регистрация" />
+        </div>
+
+        <script>
+            $('.datepicker').datetimepicker({
+                timepicker: false,
+                datepicker: true,
+                format: 'd.m.Y'
+            })
+        </script>
+    }
+</body>
+<style>
+    body {
+        padding-top: 15%;
+    }
+</style>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $("input[data-val-date]").removeAttr("data-val-date");
+    </script>
+}

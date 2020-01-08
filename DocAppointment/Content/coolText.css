@@ -1,0 +1,11 @@
+﻿.elegantshd {
+    color: #2c3e50;
+    letter-spacing: .15em;
+    font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+    font-size: 12px;
+    padding: 3px 0px;
+    text-align: center;
+    text-transform: uppercase;
+    text-rendering: optimizeLegibility;
+    text-shadow: 13px 5px 1px rgba(128, 128, 128, 0.70)
+}

@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Начална страница";
+}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="~/Content/home-page.css" rel="stylesheet" />
+<link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+<style>
+    body, h1, h2, h3, h4, h5, h6 {
+        font-family: "Lato", sans-serif
+    }
+
+    .w3-bar, h1, button {
+        font-family: "Montserrat", sans-serif
+    }
+
+    .fa-question {
+        font-size: 200px
+    }
+
+    .fa-handshake-o {
+        font-size: 150px
+    }
+</style>
+<body>
+    @if (ViewBag.infoChanged != null)
+    {
+        <div class="alert alert-success" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>@ViewBag.infoChanged</strong>
+        </div>
+    }
+
+    <!-- Header -->
+        <header class="w3-container w3-red w3-center" style="padding:128px 16px">
+            <h1 class="w3-margin w3-jumbo">DocAppoint</h1>
+            <p class="w3-xlarge">лесно и бързо запазване на час при лекар</p>
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top" onclick="location.href='@Url.Action("Register", "Account")'">Регистрирай се сега..</button>
+            }
+        </header>
+
+    <!-- First Grid -->
+    <div class="w3-row-padding w3-padding-64 w3-container">
+        <div class="w3-content">
+            <div class="w3-twothird">
+                <h1>Кой сме ние?</h1>
+                <h5 class="w3-padding-32">DocAppoint е web платформа за лесно и бързо запазване на час при лекар. 
+                Чрез нея можете лесно да откриете най-близкия и удобен за Вас специалист по всяко време на денонощието.</h5>
+
+                <p class="w3-text-grey">
+                    Нашата платформа разполага със списък с лекари, за които можете да си запишете преглед. 
+                    Лекарите са разделени по области и направления, в които извършват прегледи. 
+                    Системата разполага с филтри, чрез които можете лесно да намерите най-подходящия за Вас лекар. 
+                    Също така можете да търсите конкретен специалист по неговото име. 
+                    Можете да се откажете от записан преглед по всяко време.
+                </p>
+            </div>
+
+            <div class="w3-third w3-center">
+                <i class="fa fa-question w3-padding-64 w3-text-red"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Grid -->
+    <div class="w3-row-padding w3-light-grey w3-padding-64 w3-container">
+        <div class="w3-content">
+            <div class="w3-third w3-center">
+                <i class="fa fa-handshake-o w3-padding-64 w3-text-red w3-margin-right"></i>
+            </div>
+
+            <div class="w3-twothird">
+                <h1>Как да работите с нас?</h1>
+                <h5 class="w3-padding-32">Нашата платформа ще Ви помогне да станете в пъти по-лесно откриваем, 
+                отколкото сте били до сега. Запишете се за абонамент при нас, и ние ще Ви помогнем да намерите нови пациенти. 
+                </h5>
+
+                <p class="w3-text-grey">
+                    DocAppoint Ви дава възможност да направите тестов период на ползване от 1 месец. 
+                    Ако не Ви допадне или не видите никакъв резултат, можете да прекратите по всяко време.
+                    Свържете се с нас, и започнете още от днес на имейл: 
+                    <a href="mailto:teodorkostadinov6@gmail.com"><strong>teodorkostadinov6@gmail.com</strong></a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="w3-container w3-black w3-center w3-opacity w3-padding-64">
+        <h1 class="w3-margin w3-xlarge">&#169; @DateTime.Now.Year All rights reserved.</h1>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w3-container w3-padding-64 w3-center w3-opacity">
+        <div class="w3-xlarge w3-padding-32">
+            <a href="https://www.facebook.com"><i class="fa fa-facebook-official w3-hover-opacity"></i></a>
+            <a href="https://twitter.com"><i class="fa fa-twitter w3-hover-opacity"></i></a>
+            <a href="https://plus.google.com"><i class="fa fa-google-plus w3-hover-opacity"></i></a>
+            <a href="https://mail.google.com/mail/u/0/"><i class="fa fa-envelope w3-hover-opacity"></i></a>
+        </div>
+        <p><a href="@Url.Action("Contact", "Home")" target="_blank">Помощ при нужда?</a></p>
+        <p>Със съдействието на <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+    </footer>
+</body>
+
+@section Scripts {
+    <script>
+        // Used to toggle the menu on small screens when clicking on the menu button
+        function myFunction() {
+            var x = document.getElementById("navDemo");
+            if (x.className.indexOf("w3-show") == -1) {
+                x.className += " w3-show";
+            } else {
+                x.className = x.className.replace(" w3-show", "");
+            }
+        }
+
+        window.setTimeout(function () {
+            $(".alert").fadeTo(300, 0).slideUp(500, function () {
+                $(this).remove();
+            });
+        }, 5000);
+    </script>
+}

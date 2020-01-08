@@ -1,0 +1,15 @@
+﻿@{
+    ViewBag.Title = "Потвърдете имейл";
+}
+
+<div class="jumbotron text-center">
+    <h1 class="display-3">Акаунтът Ви беше създаден успешно!</h1>
+    <p class="lead"><strong>Изпратихме линк за активация на вашата поща!</strong> Моля, потвърдете своя акаунт, за да завършите регистрацията.</p>
+    <hr>
+    <p>
+        Имате проблем? @Html.ActionLink("Свържете се с нас", "Contact", "Home")
+    </p>
+    <p class="lead">
+        <a class="btn btn-success btn-sm" href="@Url.Action("Index", "Home")" role="button">Продължете към заглавната страница</a>
+    </p>
+</div>

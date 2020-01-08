@@ -1,0 +1,176 @@
+﻿@model DocAppointment.Models.Appointment
+@{
+    @Styles.Render("~/Content/jquery.datetimepicker.css")
+    ViewBag.Title = "Запазване на час";
+}
+
+<body>
+    @using (Html.BeginForm("SaveNewAppointment", "Appointments", FormMethod.Post, new { id = "newAppointment", @class = "form-signin", role = "form", enctype = "multipart/form-data" }))
+    {
+        @Scripts.Render("~/Scripts/jquery-3.3.1.min.js")
+        @Scripts.Render("~/Scripts/jquery.datetimepicker.js")
+        @Scripts.Render("~/bundles/jqueryval")
+        @Styles.Render("~/Content/signin.css")
+        <img class="mb-4 img-responsive center-block" style="padding-top: 2%; padding-bottom: 2%;" src="~/Content/images/newAppointment.svg" alt="" width="100" height="100">
+        <p id="first-available-datetime" style="background-color: rgba(240, 248, 255, 0.50);" class="text-success"></p>
+        <p id="notavailable" style="background-color: rgba(240, 248, 255, 0.50);" class="text-warning"></p>
+        <div class="form-group">
+            @Html.TextBoxFor(m => m.DateOfAppointment, "{0:dd.MM.yyyy HH:mm}", new { id = "datetimepicker", @class = "form-control", required = "required", @readonly = true, @placeholder = "Дата и час за преглед" })
+            @Html.ValidationMessageFor(m => m.DateOfAppointment, "", new { @class = "text-danger" })
+        </div>
+        <hr />
+        @Html.HiddenFor(m => m.Doctor.Id, new { id = "doctorId" })
+        @Html.HiddenFor(m => m.Doctor.WorktimeStart, new { id = "minTime" })
+        @Html.HiddenFor(m => m.Doctor.WorktimeEnd, new { id = "maxTime" })
+        @Html.HiddenFor(m => m.AppointmentId)
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-success center-block">Запази</button>
+
+        <script>
+            var minTime1 = $("#minTime").val().slice(11, -3);
+            var maxTime1 = $("#maxTime").val().slice(11, -3);
+
+            $("#notavailable").hide();
+            
+            // the array with all appointments to the current doctor
+            var appointmentsToTheDoc = [];
+
+            var firstAvailDateTime;
+
+            function formatDateTime(inputDate) {
+                var d = new Date(inputDate);
+
+                var month = d.getMonth() + 1;
+                var day = d.getDate();
+                var hours = d.getHours();
+                var mins = d.getMinutes();
+                var year = d.getFullYear();
+
+                var outputDate = (day < 10 ? '0' : '') + day + '.' +
+                    (month < 10 ? '0' : '') + month + '.' +
+                    (year < 10 ? '0' : '') + year + ' ' +
+                    (hours < 10 ? '0' : '') + hours + ':' +
+                    (mins < 10 ? '0' : '') + mins;
+
+                return outputDate;
+            }
+
+            // get all appointments and push them in the array
+            $.ajax({
+                type: 'GET',
+                url: '/api/appointments?doctorId=' + $("#doctorId").val(),
+                success: function (appointments) {
+                    $.each(appointments, function (i, appointment) {
+                        appointmentsToTheDoc.push(new Date(appointment.dateOfAppointment));
+                    });
+
+                    //console.log('success', appointmentsToTheDoc);
+                }
+            });
+
+            // returns the first available DateTime
+            $.ajax({
+                type: 'GET',
+                url: '/api/appointments?doctorId=' + $("#doctorId").val() + '&firstAvailable=true',
+                success: function (firstAvailableAppointment) {
+                    firstAvailDateTime = formatDateTime(firstAvailableAppointment);
+
+                    document.getElementById("first-available-datetime").innerHTML = "Най-ранен свободен час: <strong>" + firstAvailDateTime + "</strong>";
+
+                    //console.log('success', firstAvailDateTime);
+                }
+            });
+
+            $('#datetimepicker').val(null);
+            $('#datetimepicker').datetimepicker({
+                format: 'd.m.Y H:i',
+                disabledWeekDays: [0, 6],
+                minTime: minTime1,
+                maxTime: maxTime1,
+                minDate: 0,
+                defaultDate: null,
+                startDate: null,
+                defaultTime: minTime1,
+                step: 30,
+                allowBlank: true,
+                closeOnDateSelect: false,
+                closeOnTimeSelect: false,
+                onChangeDateTime: function (dp, $input) {
+                    var g1 = new Date(Date.parseDate($input.val(), 'd.m.Y H:i')); // input datetime
+                    var g2 = new Date(); // current datetime
+
+                    if (appointmentsToTheDoc.length != 0
+                        && g1.getTime() <= new Date(appointmentsToTheDoc[appointmentsToTheDoc.length - 1]).getTime()
+                        && g1.getFullYear() != 1970) {
+                        var i;
+                        var isReserved = false;
+                        document.getElementById("notavailable").innerHTML = "Тази дата и час са вече запазени!";
+
+                        for (i = 0; i < appointmentsToTheDoc.length; i++) {
+                            if (new Date(appointmentsToTheDoc[i]).getTime() == g1.getTime()) {
+                                console.log("zaet e");
+                                isReserved = true;
+                                break;
+                            }
+                            else {
+                                console.log("za sega dobre");
+                                $("#notavailable").hide();
+                                isReserved = false;
+                                continue;
+                            }
+                        }
+
+                        if (isReserved == true) {
+                            $("#notavailable").show();
+                            $('#datetimepicker').val(null);
+                        }
+                    }
+                    else {
+                        $("#notavailable").hide();
+                        console.log("nqma problem taka");
+                    }
+                        
+
+
+                    // safety check if today is still not over
+                    if (g1.getTime() < g2.getTime()) {
+                        document.getElementById("notavailable").innerHTML = "Не може да изберете по-ранен час от този в момента!";
+                        $('#datetimepicker').val(null);
+                    }
+                }
+            });
+
+            $("body").on("submit", "#newAppointment", function (e) {
+                //return confirm("Do you want to submit?");
+                var form = this; // <-- add this
+
+                e.preventDefault();
+
+                bootbox.confirm({
+                    message: "Сигурни ли сте, че искате да запазите час при този доктор?",
+                    title: "Потвърждение за запазване",
+                    buttons: {
+                        cancel: {
+                            label: "Отмени",
+                            className: "btn btn-default"
+                        },
+                        confirm: {
+                            label: "Да",
+                            className: "btn btn-success"
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            form.submit();
+                        }
+                    }
+                });
+            });
+
+            $("input[data-val-date]").removeAttr("data-val-date");
+        </script>
+    }
+    <input type="button" class="btn btn-info btn-sm" style="text-align:left;" value="Назад" onclick="location.href='@Url.Action("EditDoctor", "Doctors", new { id = Model.Doctor.Id })'" />
+</body>
+
+

@@ -1,0 +1,23 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Грешка";
+}
+
+<div id="notfound">
+    <div class="notfound">
+        <div>
+            <div class="notfound-404">
+                <h1>!</h1>
+            </div>
+            <h2>Неуспешен<br>вход</h2>
+        </div>
+        <p>@ViewBag.errorMessage <a href="https://localhost:44349/Account/Login">Върни се обратно <i class="fa fa-arrow-right material-icons"></i></a></p>
+    </div>
+</div>
+
+@section Scripts {
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/bootstrap")
+}
+

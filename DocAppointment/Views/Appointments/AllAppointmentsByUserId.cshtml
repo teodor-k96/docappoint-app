@@ -1,0 +1,197 @@
+﻿
+@{
+    ViewBag.Title = "Запазени часове";
+}
+
+<img class="mb-4 img-responsive center-block" style="padding-top: 2%;" src="~/Content/images/doctorsList.svg" alt="" width="100" height="100">
+<h2 class="text-center">Запазени часове</h2>
+<style>
+    #doctors {
+        background-image: linear-gradient(to bottom right, #9dee90, #5ee876);
+        opacity: 0.9;
+    }
+
+    h2 {
+        font-size: 30px;
+        text-transform: uppercase;
+        font-weight: 300;
+        text-align: center;
+        margin-bottom: 15px;
+        background-color: rgba(240, 248, 255, 0.50);
+    }
+
+    .tbl-header {
+        background-color: rgb(73, 174, 73);
+        color: aliceblue;
+    }
+</style>
+<table id="doctors" class="table table-bordered table-hover">
+    <thead class="tbl-header">
+        <tr>
+            <th class="text-center">Дата на преглед</th>
+            <th class="text-center">При доктор</th>
+            <th class="text-center">Специалност</th>
+            <th class="text-center">Отмени преглед</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+
+@section scripts
+{
+    <script>
+        var appointmentsToTheDoc = [];
+
+        $.ajax({
+            type: 'GET',
+            url: '/api/appointments?userid=' + '@ViewBag.currentUserId',
+            success: function (appointments) {
+                $.each(appointments, function (i, appointment) {
+                    appointmentsToTheDoc.push(appointment);
+                });
+
+                console.log('success', appointmentsToTheDoc);
+            }
+        });
+
+        $(document).ready(function () {
+            var table = $("#doctors").DataTable({
+                ajax: {
+                    type: 'GET',
+                    url: '/api/appointments?userid=' + '@ViewBag.currentUserId',
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "dateOfAppointment",
+                        render: function (data) {
+                            return formatDateTime(data);
+                        }
+                    },
+                    {
+                        data: "doctor.fullName"
+                    },
+                    {
+                        data: "doctor.specialty.specialtyName"
+                    },
+                    {
+                        data: "appointmentId",
+                        render: function (data) {
+                            var currentRowDateTime = appointmentsToTheDoc.findIndex(element => element.appointmentId == data);
+
+                            var g1 = new Date(appointmentsToTheDoc[currentRowDateTime].dateOfAppointment);
+
+                            var g2 = new Date();
+
+                            if (g1.getTime() > g2.getTime()) {
+                                return "<button class='btn btn-xs btn-warning js-delete' data-appointment-id=" + data + ">Отмени резервацията</button>";
+                            }
+
+                            return "Завършен";
+                        },
+                        searchable: false
+                    }
+                ],
+                "order": [[0, "desc"]],
+                "language": {
+                    "search": "Търсене:",
+                    "emptyTable": "Нямате резервации към момента",
+                    "info": "Показване на _START_ до _END_ от _TOTAL_ резервации",
+                    "infoEmpty": "Показване на 0 от общо 0 резервации",
+                    "infoFiltered": "(филтрирани от _MAX_ резервации общо)",
+                    "lengthMenu": "Покажи _MENU_ резервации",
+                    "loadingRecords": "Зареждане...",
+                    "processing": "Обработване...",
+                    "zeroRecords": "Не са открити съвпадения",
+                    "paginate": {
+                        "first": "Първа",
+                        "last": "Последна",
+                        "next": "Следваща",
+                        "previous": "Предишна"
+                    }
+                },
+                initComplete: function () {
+                    this.api().columns([1, 2]).every(function () {
+                        var column = this;
+                        var select = $('<select class=""><option value="">Покажи всички</option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                },
+                "searching": false
+            });
+
+            $("#doctors").on("click", ".js-delete", function () {
+                var button = $(this);
+
+                bootbox.confirm({
+                    message: "Сигурни ли сте, че искате да отмените резервацията?",
+                    title: "Потвърждение за отказ",
+                    buttons: {
+                        cancel: {
+                            label: "Отмени",
+                            className: "btn btn-default"
+                        },
+                        confirm: {
+                            label: "Да",
+                            className: "btn btn-success"
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: "/api/appointments?id=" + button.attr('data-appointment-id') + "&userid=" + "@ViewBag.currentUserId",
+                                method: "DELETE",
+                                success: function () {
+                                    table.row(button.parents("tr")).remove().draw();
+                                    toastr.success("Успешно отменихте резервацията.");
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+            function formatDateTime(inputDate) {
+                var d = new Date(inputDate);
+
+                var month = d.getMonth() + 1;
+                var day = d.getDate();
+                var hours = d.getHours();
+                var mins = d.getMinutes();
+                var year = d.getFullYear();
+
+                var outputDate = (day < 10 ? '0' : '') + day + '.' +
+                    (month < 10 ? '0' : '') + month + '.' +
+                    (year < 10 ? '0' : '') + year + ' ' +
+                    (hours < 10 ? '0' : '') + hours + ':' +
+                    (mins < 10 ? '0' : '') + mins;
+
+                return outputDate;
+            }
+        });
+    </script>
+}
+
+
+

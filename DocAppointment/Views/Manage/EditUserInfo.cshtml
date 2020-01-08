@@ -1,0 +1,128 @@
+﻿@model DocAppointment.Models.EditUserInfoViewModel
+@{
+    @Styles.Render("~/Content/jquery.datetimepicker.css")
+    ViewBag.Title = "Преглед на данни";
+}
+
+<body>
+    @using (Html.BeginForm("SaveEditInfo", "Manage", FormMethod.Post, new { @id = "Form1", @class = "form-signin text-center", role = "form", enctype = "multipart/form-data" }))
+    {
+        @Scripts.Render("~/Scripts/jquery-3.3.1.min.js")
+        @Scripts.Render("~/Scripts/jquery.datetimepicker.js")
+        @Styles.Render("~/Content/signin.css")
+        @Html.AntiForgeryToken()
+        <img class="mb-4" src="~/Content/images/profileInfo.svg" alt="" width="72" height="72">
+        <hr />
+        <h3 class="h3 mb-3 font-weight-normal">Променете данните си</h3>
+        <div class="form-group">
+            @Html.LabelFor(m => m.User.FullName, new { @class = "sr-only" })
+            @Html.TextBoxFor(m => m.User.FullName, new { @class = "form-control", @placeholder = "Име и фамилия" })
+            @Html.ValidationMessageFor(m => m.User.FullName, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.User.GenderId, new { @class = "sr-only" })
+            @Html.DropDownListFor(m => m.User.GenderId, new SelectList(Model.Genders, "Id", "GenderName"), "Изберете пол..", new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.User.GenderId, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.User.Birthdate, new { @class = "sr-only" })
+            @Html.TextBoxFor(m => m.User.Birthdate, new { @class = "form-control datepicker", Value = Model.User.Birthdate.Value.ToString("dd.MM.yyyy") })
+            @Html.ValidationMessageFor(m => m.User.Birthdate, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <div class="checkbox mb-3">
+                <label>
+                    @Html.CheckBoxFor(m => m.User.IsSecuredByNHIF)  Осигурен от НЗОК?
+                </label>
+            </div>
+        </div>
+        <hr />
+        <div id="reloadDiv" class="form-group">
+            <label class="text-info">Промяна на профилна снимка:</label>
+            <div class="text-muted small" id="userPic">
+                <img src="@Url.Action("UserPhotos", "Home" )" style="width:80px; height:80px; background: #d5d2d2;
+                    margin: auto;
+                    -moz-border-radius: 60px;
+                    border-radius: 100px;
+                    padding: 2px;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.53);" />
+            </div>
+            <div class="alert alert-info small" id="successNewPhoto" style="display: none" role="alert">
+                <strong>Успешно избрахте нова профилна снимка</strong>
+            </div>
+            <input type="file" name="UserPhoto" id="fileUpload" accept=".png,.jpg,.jpeg,.gif,.tif" />
+        </div>
+        @Html.HiddenFor(m => m.User.Id)
+        <hr />
+        <div class="form-group">
+            <input id="submitButton" type="submit" class="btn btn-sm btn-primary btn-block" value="Потвърди промените" />
+        </div>
+
+        <script>
+            $('.datepicker').datetimepicker({
+                timepicker: false,
+                datepicker: true,
+                format: 'd.m.Y'
+            })
+        </script>
+    }
+</body>
+<style>
+    body {
+        padding-top: 10%;
+    }
+</style>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $(document).ready(function () {
+            $("#fileUpload").change(function () {
+                var fileInputValue = $("#fileUpload").val();
+                if (fileInputValue != "") {
+                    $("#userPic").hide();
+                    document.getElementById("successNewPhoto").style.display = "block";
+
+                    window.setTimeout(function () {
+                        $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                }
+                else 
+                    $("#reloadDiv").load(location.href + " #reloadDiv");
+            });
+
+            $("body").on("submit", "#Form1", function (e) {
+                //return confirm("Do you want to submit?");
+                var form = this; // <-- add this
+
+                e.preventDefault();
+
+                bootbox.confirm({
+                    message: "Сигурни ли сте, че искате да запазите промените?",
+                    title: "Промени лични данни",
+                    buttons: {
+                        cancel: {
+                            label: "Отмени",
+                            className: "btn btn-default"
+                        },
+                        confirm: {
+                            label: "Да",
+                            className: "btn btn-success"
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            form.submit();
+                        }
+                    }
+                });
+            });
+        });
+
+        $("input[data-val-date]").removeAttr("data-val-date");
+    </script>
+
+}

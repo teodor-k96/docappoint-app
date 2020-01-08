@@ -1,0 +1,132 @@
+﻿@model DocAppointment.Models.ViewModels.NewDoctorViewModel
+
+@{
+    /**/
+    ViewBag.Title = Model.Doctor.FullName;
+    double priceOfExamination = 0;
+}
+
+@using (Html.BeginForm("NewAppointment", "Appointments", new { id = Model.Doctor.Id }, FormMethod.Post, new { @class = "form-signin", role = "form", enctype = "multipart/form-data" }))
+{
+    @Styles.Render("~/Content/signin.css")
+    <style>
+        .form-signin {
+            max-width: 50%;
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        input, .transparentInput {
+            max-width: 100%;
+            background-color: transparent;
+            border: 0px solid;
+        }
+
+        #bigTextBox {
+            max-width: 100%;
+            resize: none;
+            height: 150px;
+        }
+
+        .text-dark {
+            color: rgb(64, 62, 62);
+        }
+
+        .h1, .h3 {
+            font-weight: 500;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+        }
+
+        .leftPadding {
+            padding-left: 5%;
+        }
+
+        .mainText {
+            color: #ff6a00;
+        }
+    </style>
+    <div class="row" id="userPic">
+        <div class="col-md-4">
+            <img src="@Url.Action("DoctorsPhoto", "Doctors", new { id = Model.Doctor.Id })" style="width:140px; height:140px; background: #d5d2d2;
+                margin: auto;
+                -moz-border-radius: 60px;
+                border-radius: 100px;
+                padding: 2px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.53);" />
+        </div>
+        <div class="col-md-8">
+            <p class="h1 text-dark">@Model.Doctor.FullName</p>
+            <p class="h3 text-muted">@Model.Specialties.Single(c => c.Id == Model.Doctor.SpecialtyId).SpecialtyName</p>
+        </div>
+    </div>
+    <hr />
+    <div class="form-group h5">
+        <div class="mainText">
+            <i class="fa fa-address-card"></i>&nbsp @Html.DisplayFor(m => m.Cities.Single(c => c.Id == m.Doctor.CityId).CityName, new { @class = "form-control" }),
+            @Html.DisplayFor(m => m.Doctor.AddressLine, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="mainText">
+            <i class="fa fa-info-circle"></i>&nbsp @Html.Label("Обща информация", new { @class = "h5" })
+        </div>
+        @if (Model.Doctor.DoctorInfo != null)
+        {
+            <p class="leftPadding">@Html.DisplayTextFor(m => m.Doctor.DoctorInfo)</p>
+        }
+        else
+        {
+            <p class="leftPadding">Няма информация за лекаря</p>
+        }
+    </div>
+    <div class="form-group">
+        <div class="mainText">
+            <i class="fa fa-money"></i>&nbsp @Html.Label("Цена на преглед", new { @class = "h5" })
+            @Html.Label("определя се, в зависимост от осигуряването Ви" +
+             " към НЗОК", new { @class = "text-muted small h6" })
+        </div>
+
+        @if (Model.Doctor.PriceForExamination == null)
+        {
+            <p class="leftPadding">Няма информация</p>
+        }
+        else if (Model.Doctor.WorksWithNHIF == true && ViewBag.isSecured == true && Model.Doctor.PriceForExamination != 0)
+        {
+            priceOfExamination = (double)Model.Doctor.PriceForExamination;
+
+            // 70% off if the user is secured
+            priceOfExamination = (double)Model.Doctor.PriceForExamination - 0.7 * (double)Model.Doctor.PriceForExamination;
+
+            string endPrice = priceOfExamination.ToString("C");
+
+            <p class="leftPadding">@endPrice</p>
+        }
+        else if (Model.Doctor.PriceForExamination == 0)
+        {
+            <p class="leftPadding">Безплатно</p>
+        }
+        else
+        {
+            <p class="leftPadding">@Model.Doctor.PriceForExamination.Value.ToString("C")</p>
+        }
+    </div>
+    <div class="form-group">
+        <div class="mainText">
+            <i class="fa fa-calendar"></i>&nbsp @Html.Label("Работно време", new { @class = "h5" })
+            @Html.Label("почивни дни - Събота и Неделя", new { @class = "text-muted small h6" })
+        </div>
+        <p class="leftPadding">
+            @Model.Doctor.WorktimeStart.Value.ToString("t") - @Model.Doctor.WorktimeEnd.Value.ToString("t")
+        </p>
+    </div>
+    <hr />
+    @Html.HiddenFor(m => m.Doctor.Id)
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary center-block">Избери час за преглед</button>
+}
+    <input type="button" class="btn btn-info btn-sm" style="text-align:left;" value="Назад" onclick="location.href='@Url.Action("Index", "Doctors")'" />
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}
+

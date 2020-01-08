@@ -1,0 +1,107 @@
+﻿@model DocAppointment.Models.ViewModels.NewDoctorViewModel
+
+@{
+    /**/
+    @Styles.Render("~/Content/jquery.datetimepicker.css")
+    ViewBag.Title = "Нов доктор";
+}
+
+@using (Html.BeginForm("SaveNewDoctor", "Doctors", FormMethod.Post, new { @class = "form-signin", role = "form", enctype = "multipart/form-data" }))
+{
+    @Scripts.Render("~/Scripts/jquery-3.3.1.min.js")
+    @Scripts.Render("~/Scripts/jquery.datetimepicker.js")
+    @Styles.Render("~/Content/signin.css")
+    <style>
+        .form-signin {
+            max-width: 50%;
+            padding-top: 17%;
+        }
+
+        input {
+            max-width: 100%;
+        }
+
+        #bigTextBox {
+            max-width: 100%;
+            resize: none;
+            height: 150px;
+        }
+    </style>
+    <hr />
+    <div class="form-group">
+        @Html.LabelFor(m => m.Doctor.FullName)
+        @Html.TextBoxFor(m => m.Doctor.FullName, new { @class = "form-control", autofocus = "autofocus" })
+        @Html.ValidationMessageFor(m => m.Doctor.FullName, "", new { @class = "text-danger" })
+    </div>
+    <div class="row">
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Doctor.CityId)
+            @Html.DropDownListFor(m => m.Doctor.CityId, new SelectList(Model.Cities, "Id", "CityName"), "Изберете град..", new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Doctor.CityId, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Doctor.SpecialtyId)
+            @Html.DropDownListFor(m => m.Doctor.SpecialtyId, new SelectList(Model.Specialties, "Id", "SpecialtyName"), "Изберете специалност..", new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Doctor.SpecialtyId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Doctor.AddressLine)
+        @Html.TextBoxFor(m => m.Doctor.AddressLine, new { @class = "form-control", @placeholder = "Квартал, улица, блок, етаж.." })
+        @Html.ValidationMessageFor(m => m.Doctor.AddressLine, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Doctor.PriceForExamination)
+        @Html.Label("в български лева", new { @class = "text-muted small" })
+        @Html.TextBoxFor(m => m.Doctor.PriceForExamination, new { @type = "number", @class = "form-control numeric" })
+        @Html.ValidationMessageFor(m => m.Doctor.PriceForExamination, "", new { @class = "text-danger" })
+    </div>
+    <div class="row">
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Doctor.WorktimeStart)
+            @Html.TextBoxFor(m => m.Doctor.WorktimeStart, "{0:t}", new { @class = "form-control timepicker", @readonly = true })
+            @Html.ValidationMessageFor(m => m.Doctor.WorktimeStart, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(m => m.Doctor.WorktimeEnd)
+            @Html.TextBoxFor(m => m.Doctor.WorktimeEnd, "{0:t}", new { @class = "form-control timepicker", @readonly = true })
+            @Html.ValidationMessageFor(m => m.Doctor.WorktimeEnd, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Doctor.DoctorPhoto, new { @class = "text-info" })
+        <input type="file" class="text-muted" name="DoctorPhoto" id="fileUpload" accept=".png,.jpg,.jpeg,.gif,.tif" />
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Doctor.DoctorInfo)
+        @Html.TextAreaFor(m => m.Doctor.DoctorInfo, new { id = "bigTextBox", @class = "form-control", @placeholder = "Кратка информация за доктора..." })
+        @Html.ValidationMessageFor(m => m.Doctor.DoctorInfo, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <div class="checkbox">
+            <label>
+                @Html.CheckBoxFor(m => m.Doctor.WorksWithNHIF) Работи ли с НЗОК?
+            </label>
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.Doctor.Id)
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary center-block">Запази</button>
+
+    <script>
+        $('.timepicker').datetimepicker({
+            timepicker: true,
+            datepicker: false,
+            format: 'H:i',
+            step: 30
+        })
+
+        $("input[data-val-date]").removeAttr("data-val-date");
+    </script>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}
+

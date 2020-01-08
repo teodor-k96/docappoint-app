@@ -1,0 +1,168 @@
+﻿
+@{
+    ViewBag.Title = "Лекари";
+}
+
+<img class="mb-4 img-responsive center-block" style="padding-top: 2%;" src="~/Content/images/doctorsList.svg" alt="" width="100" height="100">
+<h2 class="text-center">Списък с лекари</h2>
+<hr />
+<input type="button" class="btn btn-primary" value="Нов доктор" onclick="location.href='@Url.Action("NewDoctor", "Doctors")'" />
+<hr />
+
+@if (ViewBag.newDocMessage != null)
+{
+    <div class="alert alert-success" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>@ViewBag.newDocMessage</strong>
+    </div>
+}
+
+<style>
+    #doctors {
+        background-color: #e5e0c7;
+        background-image: linear-gradient(to bottom right, rgba(199, 251, 244, 0.70), #91ddfa);
+    }
+
+    h2 {
+        font-size: 30px;
+        text-transform: uppercase;
+        font-weight: 300;
+        text-align: center;
+        margin-bottom: 15px;
+        background-color: rgba(240, 248, 255, 0.50);
+    }
+
+    .tbl-header {
+        background-color: rgb(219, 119, 47);
+        color: aliceblue;
+    }
+</style>
+<table id="doctors" class="table table-bordered table-hover">
+    <thead class="tbl-header">
+        <tr>
+            <th class="text-center">Име</th>
+            <th class="text-center">Специалност</th>
+            <th class="text-center">Град</th>
+            <th class="text-center">Изтрий</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            var table = $("#doctors").DataTable({
+                ajax: {
+                    url: "/api/doctors",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "fullName",
+                        render: function (data, type, doctor) {   //kakvo da izpulnqva poleto
+                            return "<a href='/doctors/editDoctor/" + doctor.id + "'>" + "<i>" + doctor.fullName + "</i>" + "</a>";
+                        }
+                    },
+                    {
+                        data: "specialty.specialtyName"
+                    },
+                    {
+                        data: "city.cityName"
+                    },
+                    {
+                        data: "id",
+                        render: function (data) {
+                            return "<button class='btn btn-xs btn-warning js-delete' data-doctor-id=" + data + ">Изтрий доктор</button>";
+                        }
+                    }
+                ],
+                "language": {
+                    "search": "Търси по всички полета:",
+                    "emptyTable": "Няма активни лекари към момента",
+                    "info": "Показване на _START_ до _END_ от _TOTAL_ лекари",
+                    "infoEmpty": "Показване на 0 от общо 0 лекари",
+                    "infoFiltered": "(филтрирани от _MAX_ лекари общо)",
+                    "lengthMenu": "Покажи _MENU_ лекари",
+                    "loadingRecords": "Зареждане...",
+                    "processing": "Обработване...",
+                    "zeroRecords": "Не са открити съвпадения",
+                    "paginate": {
+                        "first": "Първа",
+                        "last": "Последна",
+                        "next": "Следваща",
+                        "previous": "Предишна"
+                    }
+                },
+                initComplete: function () {
+                    this.api().columns([1, 2]).every(function () {
+                        var column = this;
+                        var select = $('<select class=""><option value="">Покажи всички</option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+
+            $("#doctors").on("click", ".js-delete", function () {  //taka shte ima samo edin handler, zashtoto shte e zakachen za selectora, ne za vseki button
+                var button = $(this);
+
+                bootbox.confirm({
+                    message: "Сигурни ли сте, че искате да изтриете този доктор?",
+                    title: "Потвърждение",
+                    buttons: {
+                        cancel: {
+                            label: "Отмени",
+                            className: "btn btn-default"
+                        },
+                        confirm: {
+                            label: "Да",
+                            className: "btn btn-success"
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: "/api/doctors/" + button.attr("data-doctor-id"),
+                                method: "DELETE",
+                                success: function () {
+                                    table.row(button.parents("tr")).remove().draw();
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+            window.setTimeout(function () {
+                $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                    $(this).remove();
+                });
+            }, 4000);
+        });
+    </script>
+}
+
+
+
